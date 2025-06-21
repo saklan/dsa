@@ -1,0 +1,107 @@
+#include <iostream>
+using namespace std;
+
+#define MAX 100
+
+// Custom Queue
+struct Queue {
+    int items[MAX];
+    int front, rear;
+
+    Queue() {
+        front = 0;
+        rear = -1;
+    }
+
+    void enqueue(int value) {
+        if (rear < MAX - 1) {
+            items[++rear] = value;
+        }
+    }
+
+    int dequeue() {
+        if (front <= rear) {
+            return items[front++];
+        }
+        return -1; // Empty
+    }
+
+    bool isEmpty() {
+        return front > rear;
+    }
+};
+
+int main() {
+    // Mapping characters to index: S=0, A=1, B=2, C=3, D=4, E=5, F=6, G=7
+    const int N = 8;
+    int graph[N][N] = {0};
+
+    // Build adjacency matrix from image
+    graph[0][1] = 1; // S → A
+    graph[0][2] = 1; // S → B
+    graph[1][3] = 1; // A → C
+    graph[1][4] = 1; // A → D
+    graph[2][5] = 1; // B → E
+    graph[2][6] = 1; // B → F
+    graph[3][4] = 1; // C → D
+    graph[3][0] = 1; // C → S
+    graph[4][2] = 1; // D → B
+    graph[4][7] = 1; // D → G
+    graph[5][6] = 1; // E → F
+    graph[6][2] = 1; // F → B
+
+    int visited[N] = {0};
+    int parent[N]; // To store path
+    for (int i = 0; i < N; i++) parent[i] = -1;
+
+    Queue q;
+    int start = 0; // S
+    int goal = 7;  // G
+
+    visited[start] = 1;
+    q.enqueue(start);
+
+    while (!q.isEmpty()) {
+        int u = q.dequeue();
+        for (int v = 0; v < N; v++) {
+            if (graph[u][v] && !visited[v]) {
+                visited[v] = 1;
+                parent[v] = u;
+                q.enqueue(v);
+            }
+        }
+    }
+
+    // Reconstruct path from S to G
+    if (!visited[goal]) {
+        cout << "No path found from S to G" << endl;
+    } else {
+        int path[N];
+        int len = 0;
+        int temp = goal;
+        while (temp != -1) {
+            path[len++] = temp;
+            temp = parent[temp];
+        }
+
+        // Print path in reverse (from start to goal)
+        cout << "Shortest path from S to G: ";
+        for (int i = len - 1; i >= 0; i--) {
+            char node = 'S' + path[i]; // Mapping index back to char
+            if (path[i] == 0) node = 'S';
+            else if (path[i] == 1) node = 'A';
+            else if (path[i] == 2) node = 'B';
+            else if (path[i] == 3) node = 'C';
+            else if (path[i] == 4) node = 'D';
+            else if (path[i] == 5) node = 'E';
+            else if (path[i] == 6) node = 'F';
+            else if (path[i] == 7) node = 'G';
+
+            cout << node;
+            if (i != 0) cout << " -> ";
+        }
+        cout << endl;
+    }
+
+    return 0;
+}
